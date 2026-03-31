@@ -101,19 +101,6 @@ SPECIES_ENC = {
     'enterococcus faecalis' : 9,
 }
 
-# ── Clean feature order — must match training exactly ─────────
-CLEAN_FEATURES = [
-    'species_enc', 'age', 'gender_enc', 'has_diabetes',
-    'has_hypertension', 'prior_hospitalisation', 'is_mendeley',
-    'card_n_active_drug_classes', 'card_relevant_gene_count',
-    'card_mechanism_diversity', 'card_gene_family_diversity',
-    'card_has_target_protection', 'card_has_reduced_permeability',
-    'card_has_ctx_m', 'card_has_tem', 'card_has_kpc',
-    'card_has_ndm', 'card_has_vim', 'card_has_imp',
-    'card_has_oxa_48', 'card_has_mcr', 'card_has_qnr',
-    'card_has_aac', 'card_has_rnd_efflux', 'card_has_mfs_efflux',
-]
-
 TARGET_LABELS = {
     'target_beta_lactam'   : 'Beta-lactam',
     'target_aminoglycoside': 'Aminoglycoside',
@@ -155,9 +142,38 @@ TREATMENT_GUIDE = {
     },
 }
 
+# ── Per-model feature sets — must exactly match training ──────
+# BUG FIX: Added missing features to each target:
+#   target_aminoglycoside : added 'is_mdr'
+#   target_quinolone      : added 'gene_mechanism_ratio'
+#   target_other          : added 'gene_density', 'mechanism_density'
+FEATURE_SETS = {
+    'target_beta_lactam': [
+        'species_enc', 'age', 'card_relevant_gene_count',
+        'card_has_oxa_48', 'card_has_vim', 'card_gene_family_diversity',
+        'card_has_kpc', 'card_has_tem', 'card_has_imp',
+    ],
+    'target_aminoglycoside': [
+        'age', 'card_relevant_gene_count', 'card_gene_family_diversity',
+        'species_enc', 'card_n_active_drug_classes', 'card_mechanism_diversity',
+        'prior_hospitalisation', 'has_hypertension', 'has_diabetes',
+        'gender_enc', 'is_mdr', 'total_antibiotics_tested',   # ← is_mdr restored
+    ],
+    'target_quinolone': [
+        'card_has_qnr', 'age', 'card_has_target_protection',
+        'card_mechanism_diversity', 'card_relevant_gene_count',
+        'species_enc', 'card_gene_family_diversity',
+        'gene_mechanism_ratio',                                # ← restored
+    ],
+    'target_other': [
+        'age', 'card_n_active_drug_classes', 'species_enc',
+        'card_relevant_gene_count', 'card_gene_family_diversity',
+        'gene_density', 'mechanism_density',                   # ← restored
+    ],
+}
+
 # ─────────────────────────────────────────────────────────────
 # DEMO PREDICTION (when models not loaded)
-# Uses simplified heuristic rules based on CARD features
 # ─────────────────────────────────────────────────────────────
 def demo_predict(features_dict):
     """Heuristic fallback prediction for demo mode."""
@@ -172,7 +188,6 @@ def demo_predict(features_dict):
     qnr   = features_dict.get('card_has_qnr', 0)
     aac   = features_dict.get('card_has_aac', 0)
     n_act = features_dict.get('card_n_active_drug_classes', 0)
-    sp    = features_dict.get('species_enc', 0)
 
     # Beta-lactam
     if kpc or ndm or vim or imp_g:
@@ -224,7 +239,7 @@ def demo_predict(features_dict):
 # ─────────────────────────────────────────────────────────────
 # MAIN APP
 # ─────────────────────────────────────────────────────────────
-models = load_models()
+models    = load_models()
 demo_mode = len(models) == 0
 
 # ── Header ────────────────────────────────────────────────────
@@ -256,57 +271,76 @@ with st.sidebar:
         options=list(SPECIES_ENC.keys()),
         format_func=lambda x: x.title(),
     )
-    age = st.slider("Patient age", 1, 95, 45)
+    age    = st.slider("Patient age", 1, 95, 45)
     gender = st.radio("Gender", ["Male", "Female"], horizontal=True)
 
     st.subheader("Clinical Risk Factors")
-    diabetes      = st.checkbox("Diabetes")
-    hypertension  = st.checkbox("Hypertension")
-    prior_hosp    = st.checkbox("Prior hospitalisation")
+    diabetes     = st.checkbox("Diabetes")
+    hypertension = st.checkbox("Hypertension")
+    prior_hosp   = st.checkbox("Prior hospitalisation")
 
     st.subheader("🧬 CARD Resistance Genes")
     st.caption("Select genes detected in this isolate")
 
     col1, col2 = st.columns(2)
     with col1:
-        ctx_m  = st.checkbox("CTX-M (ESBL)", help="Extended-spectrum beta-lactamase — cephalosporin resistance")
+        ctx_m  = st.checkbox("CTX-M (ESBL)", help="Extended-spectrum beta-lactamase")
         tem    = st.checkbox("TEM",           help="TEM beta-lactamase — penicillin resistance")
-        kpc    = st.checkbox("KPC",           help="Klebsiella pneumoniae carbapenemase — Reserve antibiotic resistance")
-        ndm    = st.checkbox("NDM",           help="New Delhi metallo-beta-lactamase — broad carbapenem resistance")
-        vim    = st.checkbox("VIM",           help="Verona integron-encoded MBL — carbapenem resistance")
+        kpc    = st.checkbox("KPC",           help="Klebsiella pneumoniae carbapenemase")
+        ndm    = st.checkbox("NDM",           help="New Delhi metallo-beta-lactamase")
+        vim    = st.checkbox("VIM",           help="Verona integron-encoded MBL")
     with col2:
         imp_g  = st.checkbox("IMP",           help="Imipenem-resistant MBL")
         oxa_48 = st.checkbox("OXA-48",        help="OXA-48 carbapenemase")
-        mcr    = st.checkbox("MCR",           help="Colistin resistance gene — last-resort antibiotic")
+        mcr    = st.checkbox("MCR",           help="Colistin resistance gene")
         qnr    = st.checkbox("QNR",           help="Quinolone resistance protein")
         aac    = st.checkbox("AAC",           help="Aminoglycoside-modifying enzyme")
 
     st.subheader("Mechanism Flags")
-    rnd_efflux = st.checkbox("RND efflux pump",  help="Resistance-nodulation-cell division efflux")
-    mfs_efflux = st.checkbox("MFS efflux pump",  help="Major facilitator superfamily efflux")
-    tgt_prot   = st.checkbox("Target protection",help="Resistance via target protection mechanism")
+    rnd_efflux = st.checkbox("RND efflux pump",      help="Resistance-nodulation-cell division efflux")
+    mfs_efflux = st.checkbox("MFS efflux pump",      help="Major facilitator superfamily efflux")
+    tgt_prot   = st.checkbox("Target protection",    help="Resistance via target protection mechanism")
     red_perm   = st.checkbox("Reduced permeability", help="Porin loss — reduced drug entry")
 
     predict_btn = st.button("🔍 Predict Resistance", use_container_width=True, type="primary")
 
 
 # ── Build feature vector ──────────────────────────────────────
+# Count active resistance mechanisms
 n_active = sum([ctx_m, tem, kpc, ndm, vim, imp_g, oxa_48, mcr, qnr, aac,
                 rnd_efflux, mfs_efflux])
 
 # Estimate continuous CARD features from binary flags
-gene_count  = n_active * 8   # rough gene count per family
-mech_div    = sum([
-    int(any([ctx_m, tem, kpc, ndm, vim, imp_g, oxa_48])),  # inactivation
-    int(rnd_efflux or mfs_efflux),                          # efflux
-    int(tgt_prot),                                          # protection
-    int(red_perm),                                          # permeability
-    int(qnr),                                               # target alteration
+gene_count   = n_active * 8
+mech_div     = sum([
+    int(any([ctx_m, tem, kpc, ndm, vim, imp_g, oxa_48])),
+    int(rnd_efflux or mfs_efflux),
+    int(tgt_prot),
+    int(red_perm),
+    int(qnr),
 ])
-gene_fam_div = n_active
+gene_fam_div             = n_active
 total_antibiotics_tested = n_active
 
+# MDR proxy: resistant to ≥3 drug classes based on gene presence
+# (approximation — in training this came from actual AST labels)
+beta_r  = int(any([kpc, ndm, vim, imp_g, ctx_m, oxa_48, tem]))
+amino_r = int(aac)
+quin_r  = int(qnr)
+other_r = int(mcr)
+is_mdr  = int((beta_r + amino_r + quin_r + other_r) >= 3)   # ← BUG 1 FIX
+
+# Engineered ratio features — same formulas as training notebook
+# BUG 2 FIX: gene_mechanism_ratio for target_quinolone
+gene_mechanism_ratio = mech_div / (gene_count + 1)
+
+# BUG 3 FIX: gene_density and mechanism_density for target_other
+gene_density      = gene_count / (gene_fam_div + 1)
+mechanism_density = n_active   / (gene_fam_div + 1)
+
+# Full features dict — all raw + engineered features in one place
 features_dict = {
+    # ── Demographics / clinical ──────────────────────────────
     'species_enc'               : SPECIES_ENC.get(species, 0),
     'age'                       : age,
     'gender_enc'                : 1 if gender == 'Female' else 0,
@@ -314,51 +348,33 @@ features_dict = {
     'has_hypertension'          : int(hypertension),
     'prior_hospitalisation'     : int(prior_hosp),
     'is_mendeley'               : 0,
-    'total_antibiotics_tested': total_antibiotics_tested,
+    'total_antibiotics_tested'  : total_antibiotics_tested,
+    # ── Derived resistance summary ───────────────────────────
+    'is_mdr'                    : is_mdr,               # BUG 1 FIX
+    # ── CARD continuous features ─────────────────────────────
     'card_n_active_drug_classes': n_active,
     'card_relevant_gene_count'  : gene_count,
     'card_mechanism_diversity'  : mech_div,
     'card_gene_family_diversity': gene_fam_div,
-    'card_has_target_protection': int(tgt_prot),
-    'card_has_reduced_permeability': int(red_perm),
-    'card_has_ctx_m'            : int(ctx_m),
-    'card_has_tem'              : int(tem),
-    'card_has_kpc'              : int(kpc),
-    'card_has_ndm'              : int(ndm),
-    'card_has_vim'              : int(vim),
-    'card_has_imp'              : int(imp_g),
-    'card_has_oxa_48'           : int(oxa_48),
-    'card_has_mcr'              : int(mcr),
-    'card_has_qnr'              : int(qnr),
-    'card_has_aac'              : int(aac),
-    'card_has_rnd_efflux'       : int(rnd_efflux),
-    'card_has_mfs_efflux'       : int(mfs_efflux),
-}
-
-#X_input = pd.DataFrame([features_dict])[CLEAN_FEATURES]
-X_full = pd.DataFrame([features_dict])[CLEAN_FEATURES]
-
-FEATURE_SETS = {
-    'target_beta_lactam': [
-        'species_enc','age','card_relevant_gene_count','card_has_oxa_48',
-        'card_has_vim','card_gene_family_diversity','card_has_kpc',
-        'card_has_tem','card_has_imp'
-    ],
-    'target_aminoglycoside': [
-        'age','card_relevant_gene_count','card_gene_family_diversity',
-        'species_enc','card_n_active_drug_classes','card_mechanism_diversity',
-        'prior_hospitalisation','has_hypertension','has_diabetes',
-        'gender_enc','total_antibiotics_tested'
-    ],
-    'target_quinolone': [
-        'card_has_qnr','age','card_has_target_protection',
-        'card_mechanism_diversity','card_relevant_gene_count',
-        'species_enc','card_gene_family_diversity'
-    ],
-    'target_other': [
-        'age','card_n_active_drug_classes','species_enc',
-        'card_relevant_gene_count','card_gene_family_diversity'
-    ]
+    # ── CARD binary gene flags ───────────────────────────────
+    'card_has_target_protection'    : int(tgt_prot),
+    'card_has_reduced_permeability' : int(red_perm),
+    'card_has_ctx_m'                : int(ctx_m),
+    'card_has_tem'                  : int(tem),
+    'card_has_kpc'                  : int(kpc),
+    'card_has_ndm'                  : int(ndm),
+    'card_has_vim'                  : int(vim),
+    'card_has_imp'                  : int(imp_g),
+    'card_has_oxa_48'               : int(oxa_48),
+    'card_has_mcr'                  : int(mcr),
+    'card_has_qnr'                  : int(qnr),
+    'card_has_aac'                  : int(aac),
+    'card_has_rnd_efflux'           : int(rnd_efflux),
+    'card_has_mfs_efflux'           : int(mfs_efflux),
+    # ── Engineered ratio features ────────────────────────────
+    'gene_mechanism_ratio'      : gene_mechanism_ratio, # BUG 2 FIX
+    'gene_density'              : gene_density,         # BUG 3 FIX
+    'mechanism_density'         : mechanism_density,    # BUG 3 FIX
 }
 
 # ── Prediction ────────────────────────────────────────────────
@@ -366,9 +382,14 @@ if predict_btn:
     if models:
         predictions, probabilities = {}, {}
         for target, model in models.items():
+            # BUG 4 FIX: build X_input directly from features_dict using
+            # the per-model feature list — no intermediate X_full or reindex.
+            # This guarantees column names AND order exactly match training.
             feature_list = FEATURE_SETS[target]
-            #X_input = X_full[feature_list]
-            X_input = X_full.reindex(columns=feature_list, fill_value=0)
+            X_input = pd.DataFrame(
+                [[features_dict[f] for f in feature_list]],
+                columns=feature_list,
+            )
             pred = int(model.predict(X_input)[0])
             prob = model.predict_proba(X_input)[0].tolist()
             predictions[target] = pred
@@ -379,10 +400,10 @@ if predict_btn:
     st.header(f"Results for {species.title()}")
 
     # ── MDR assessment ────────────────────────────────────────
-    n_resistant  = sum(1 for v in predictions.values() if v == 2)
-    is_mdr       = n_resistant >= 3
-    is_critical  = (predictions.get('target_beta_lactam') == 2 and
-                    any([kpc, ndm, vim, imp_g, oxa_48]))
+    n_resistant   = sum(1 for v in predictions.values() if v == 2)
+    is_mdr_result = n_resistant >= 3
+    is_critical   = (predictions.get('target_beta_lactam') == 2 and
+                     any([kpc, ndm, vim, imp_g, oxa_48]))
     is_colistin_r = predictions.get('target_other') == 2 and mcr
 
     if is_critical or is_colistin_r:
@@ -391,7 +412,7 @@ if predict_btn:
             'Immediate infectious disease consultation required.</div>',
             unsafe_allow_html=True
         )
-    elif is_mdr:
+    elif is_mdr_result:
         st.warning(f"⚠️ Multi-Drug Resistant (MDR) — Resistant to {n_resistant}/4 antibiotic classes")
     else:
         st.markdown(
@@ -432,10 +453,10 @@ if predict_btn:
         ax   = axes[i]
         ax.set_facecolor('#1e2130')
         bars = ax.bar(['S', 'I', 'R'], prob,
-                      color=['#2ecc71','#f39c12','#e74c3c'],
+                      color=['#2ecc71', '#f39c12', '#e74c3c'],
                       edgecolor='none', width=0.5)
         for bar, p in zip(bars, prob):
-            ax.text(bar.get_x() + bar.get_width()/2,
+            ax.text(bar.get_x() + bar.get_width() / 2,
                     bar.get_height() + 0.02, f'{p:.2f}',
                     ha='center', color='white', fontsize=9)
         ax.set_ylim(0, 1.15)
@@ -453,7 +474,6 @@ if predict_btn:
     for target, label in TARGET_LABELS.items():
         pred = predictions.get(target, 0)
         cls  = CLASS_LABEL[pred]
-        clr  = CLASS_COLOR[pred]
         tip  = TREATMENT_GUIDE[target][pred]
         reserve_note = ""
         if target in RESERVE_DRUGS and pred == 2:
@@ -497,7 +517,7 @@ else:
         'Weighted F1'  : [0.995, 0.961, 0.967, 0.980],
         'Macro F1'     : [0.881, 0.742, 0.763, 0.761],
         'ROC-AUC'      : [1.000, 0.990, 0.992, 0.997],
-        'CV Mean ± Std': ['0.994 ± 0.002','0.966 ± 0.011','0.973 ± 0.006','0.988 ± 0.003'],
+        'CV Mean ± Std': ['0.994 ± 0.002', '0.966 ± 0.011', '0.973 ± 0.006', '0.988 ± 0.003'],
     }
     st.dataframe(pd.DataFrame(perf_data), use_container_width=True, hide_index=True)
 
