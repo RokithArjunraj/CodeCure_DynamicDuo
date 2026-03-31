@@ -334,7 +334,7 @@ features_dict = {
 }
 
 #X_input = pd.DataFrame([features_dict])[CLEAN_FEATURES]
-X_full = pd.DataFrame([features_dict])
+X_full = pd.DataFrame([features_dict])[CLEAN_FEATURES]
 
 FEATURE_SETS = {
     'target_beta_lactam': [
