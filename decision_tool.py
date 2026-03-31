@@ -304,6 +304,7 @@ mech_div    = sum([
     int(qnr),                                               # target alteration
 ])
 gene_fam_div = n_active
+total_antibiotics_tested = n_active
 
 features_dict = {
     'species_enc'               : SPECIES_ENC.get(species, 0),
@@ -313,6 +314,7 @@ features_dict = {
     'has_hypertension'          : int(hypertension),
     'prior_hospitalisation'     : int(prior_hosp),
     'is_mendeley'               : 0,
+    'total_antibiotics_tested': total_antibiotics_tested,
     'card_n_active_drug_classes': n_active,
     'card_relevant_gene_count'  : gene_count,
     'card_mechanism_diversity'  : mech_div,
