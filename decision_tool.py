@@ -333,14 +333,39 @@ features_dict = {
     'card_has_mfs_efflux'       : int(mfs_efflux),
 }
 
-X_input = pd.DataFrame([features_dict])[CLEAN_FEATURES]
+#X_input = pd.DataFrame([features_dict])[CLEAN_FEATURES]
+X_full = pd.DataFrame([features_dict])
 
+FEATURE_SETS = {
+    'target_beta_lactam': [
+        'species_enc','age','card_relevant_gene_count','card_has_oxa_48',
+        'card_has_vim','card_gene_family_diversity','card_has_kpc',
+        'card_has_tem','card_has_imp'
+    ],
+    'target_aminoglycoside': [
+        'age','card_relevant_gene_count','card_gene_family_diversity',
+        'species_enc','card_n_active_drug_classes','card_mechanism_diversity',
+        'prior_hospitalisation','has_hypertension','has_diabetes',
+        'gender_enc','total_antibiotics_tested'
+    ],
+    'target_quinolone': [
+        'card_has_qnr','age','card_has_target_protection',
+        'card_mechanism_diversity','card_relevant_gene_count',
+        'species_enc','card_gene_family_diversity'
+    ],
+    'target_other': [
+        'age','card_n_active_drug_classes','species_enc',
+        'card_relevant_gene_count','card_gene_family_diversity'
+    ]
+}
 
 # ── Prediction ────────────────────────────────────────────────
 if predict_btn:
     if models:
         predictions, probabilities = {}, {}
         for target, model in models.items():
+            feature_list = FEATURE_SETS[target]
+            X_input = X_full[feature_list]
             pred = int(model.predict(X_input)[0])
             prob = model.predict_proba(X_input)[0].tolist()
             predictions[target] = pred
