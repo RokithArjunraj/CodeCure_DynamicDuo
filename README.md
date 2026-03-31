@@ -4,7 +4,7 @@
 
 
 
-### **CodeCure Biohackathon 2025 — Track B: Antibiotic Resistance Prediction**
+### **CodeCure Biohackathon 2025 — Track B: Antibiotic Resistance Prediction** 
 
 [ Live Decision Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [ Notebooks](./Notebooks/) · [Outputs](./outputs/)
 
