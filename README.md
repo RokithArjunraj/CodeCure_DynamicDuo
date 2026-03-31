@@ -4,7 +4,7 @@
 
 ### CodeCure Biohackathon 2025 — Track B: Antibiotic Resistance Prediction
 
-[🔴 Live Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [📓 Notebooks](./Notebooks/) · [📁 Outputs](./outputs/)
+[ Live Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [ Notebooks](./Notebooks/) · [ Outputs](./outputs/)
 
 *Predicting antibiotic resistance in bacterial isolates by bridging phenotypic susceptibility data with CARD genomic resistance knowledge — enabling data-driven treatment guidance.*
 
@@ -120,7 +120,7 @@ All top features align with published AMR biology: OXA-48/VIM/KPC as dominant ca
 
 Enter species, patient demographics, and detected CARD genes → get S/I/R predictions for all 4 drug classes with confidence bars, treatment guidance, and a **critical MDR alert** for WHO Reserve antibiotic resistance.
 
-> ⚕️ For research and educational use only. Clinical decisions require qualified healthcare professionals.
+>  For research and educational use only. Clinical decisions require qualified healthcare professionals.
 
 ---
 
