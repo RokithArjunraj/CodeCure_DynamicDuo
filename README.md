@@ -1,16 +1,12 @@
-# 🦠 AMR Resistance Predictor — CodeCure DynamicDuo
+#  AMR Resistance Predictor — CodeCure DynamicDuo
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![XGBoost](https://img.shields.io/badge/XGBoost-3.2-EA4C89?style=for-the-badge)
-![Streamlit](https://img.shields.io/badge/Streamlit-Live-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![CARD](https://img.shields.io/badge/CARD_DB-v4.0.1-2ECC71?style=for-the-badge)
-![EUCAST](https://img.shields.io/badge/EUCAST-v14.0-0078D4?style=for-the-badge)
+
 
 ### **CodeCure Biohackathon 2025 — Track B: Antibiotic Resistance Prediction**
 
-[🚀 Live Decision Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [📓 Notebooks](./Notebooks/) · [📊 Outputs](./outputs/)
+[ Live Decision Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [ Notebooks](./Notebooks/) · [Outputs](./outputs/)
 
 *Predicting antibiotic resistance patterns in bacterial isolates by bridging phenotypic susceptibility data with CARD genomic resistance knowledge — enabling data-driven treatment guidance.*
 
@@ -18,7 +14,7 @@
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Antimicrobial resistance (AMR) is classified by the WHO as one of the top global public health threats. Predicting which antibiotics a bacterial isolate will resist can guide clinical treatment decisions before lab sensitivity results are available — potentially saving lives in severe infections.
 
@@ -28,18 +24,18 @@ This project addresses **Track B** of the CodeCure Biohackathon:
 
 ---
 
-## ⚡ Key Results at a Glance
+##  Key Results at a Glance
 
 | Drug Class | Weighted F1 | Macro F1 | ROC-AUC | 5-Fold CV |
 |:---:|:---:|:---:|:---:|:---:|
-| 🔴 **Beta-lactam** | **0.994** | 0.859 | 1.000 | 0.994 ± 0.002 |
-| 🔵 **Aminoglycoside** | **0.965** | 0.758 | 0.990 | 0.965 ± 0.011 |
-| 🟢 **Quinolone** | **0.959** | 0.752 | 0.990 | 0.970 ± 0.002 |
-| 🟣 **Other antibiotics** | **0.976** | 0.722 | 0.996 | 0.987 ± 0.002 |
+| **Beta-lactam** | **0.994** | 0.859 | 1.000 | 0.994 ± 0.002 |
+|  **Aminoglycoside** | **0.965** | 0.758 | 0.990 | 0.965 ± 0.011 |
+|  **Quinolone** | **0.959** | 0.752 | 0.990 | 0.970 ± 0.002 |
+|  **Other antibiotics** | **0.976** | 0.722 | 0.996 | 0.987 ± 0.002 |
 
 > **On the beta-lactam score**: The high weighted F1 (0.994) partly reflects the dataset's 94.7% beta-lactam resistance rate — itself a clinically alarming finding. **Macro F1 = 0.859** is the more meaningful metric, confirming the model correctly handles all three resistance classes including the rare Susceptible and Intermediate cases. Low CV standard deviation (±0.002) confirms stability, not overfitting.
 
-### 🏥 Critical Clinical Findings
+###  Critical Clinical Findings
 - **60.6%** of isolates resist at least one WHO Reserve antibiotic (imipenem or colistin)
 - **30.6%** of isolates are Multi-Drug Resistant (≥3 antibiotic classes) — 1 in 3 infections has no standard first-line treatment
 - **CTX-M** and **OXA-48** are the strongest predictors of beta-lactam resistance
@@ -47,7 +43,7 @@ This project addresses **Track B** of the CodeCure Biohackathon:
 
 ---
 
-## 🏗️ Pipeline Architecture
+## Pipeline Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -94,27 +90,27 @@ This project addresses **Track B** of the CodeCure Biohackathon:
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 CodeCure_DynamicDuo/
 │
-├── 📓 Notebooks/
+├──  Notebooks/
 │   ├── 01_Data_Integration_Preprocessing_FE.ipynb   ← Full data pipeline
 │   └── 02_Model_Building_Feature_imp.ipynb           ← Modelling + SHAP
 │
-├── 📊 Data/
+├──  Data/
 │   ├── raw/                            ← Source datasets (see Setup)
 │   └── processed/
 │       └── amr_final_v2.csv            ← Clean integrated dataset (10,231 × 70)
 │
-├── 🤖 models/
+├──  models/
 │   ├── xgb_beta_lactam.pkl
 │   ├── xgb_aminoglycoside.pkl
 │   ├── xgb_quinolone.pkl
 │   └── xgb_other.pkl
 │
-├── 📈 outputs/
+├──  outputs/
 │   ├── confusion_matrices_all.png          ← 2×2 confusion matrix grid
 │   ├── classwise_f1_heatmap.png            ← F1 heatmap S/I/R × drug class
 │   ├── shap_bar_target_*.png               ← SHAP global importance bars
@@ -126,10 +122,10 @@ CodeCure_DynamicDuo/
 │   ├── gene_network_static.png             ← Resistance gene network (static)
 │   └── resistance_gene_network.html        ← Interactive gene network ← open in browser
 │
-├── 🌐 app.py                 ← Streamlit decision-support tool
-├── 🕸️  gene_network.py        ← Gene network visualisation
-├── 📦 requirements.txt
-└── 📖 README.md
+├──  app.py                 ← Streamlit decision-support tool
+├──   gene_network.py        ← Gene network visualisation
+├──  requirements.txt
+└──  README.md
 ```
 
 ---
@@ -208,7 +204,7 @@ Imbalance handling: SMOTE + `compute_sample_weight('balanced')` on training set.
 
 ---
 
-## 📊 Detailed Results
+## Detailed Results
 
 ### Class-wise Performance
 
@@ -244,7 +240,7 @@ aminoglycoside    Resistant      0.994   1.000     0.997      698
 
 ---
 
-## 🧬 SHAP Feature Importance
+##  SHAP Feature Importance
 
 SHAP values computed using `shap.Explainer` (interventional, 200 background + 200 test samples). Class 2 (Resistant) shown — the most clinically important class.
 
@@ -278,7 +274,7 @@ This biological consistency validates that the model learned genuine resistance 
 The interactive HTML network (`outputs/resistance_gene_network.html`) visualises connections between resistance genes, mechanisms, and drug classes:
 
 - **Nodes**: Resistance genes (sized by clinical risk) + Drug class nodes (squares)
-- **Node colors**: 🔴 Critical (carbapenemases, MCR) | 🟠 High | 🟡 Medium | 🟢 Low
+- **Node colors**:  Critical (carbapenemases, MCR) |  High |  Medium |  Low
 - **Solid edges**: Gene → drug class (confers resistance to this drug family)
 - **Dashed edges**: Gene co-occurrence in ≥2 shared species
 - **Hover**: Shows gene family, mechanism, affected species, and clinical risk level
@@ -287,7 +283,7 @@ The interactive HTML network (`outputs/resistance_gene_network.html`) visualises
 
 ---
 
-## 🩺 Decision-Support Tool
+##  Decision-Support Tool
 
 **Live app**: [https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/)
 
@@ -300,11 +296,11 @@ The Streamlit tool allows clinicians and researchers to:
 5. Read treatment guidance per drug class
 6. Receive a **critical MDR alert** when WHO Reserve antibiotics are predicted resistant
 
-> ⚕️ This tool is for research and educational purposes only. Clinical treatment decisions must be made by qualified healthcare professionals.
+>  This tool is for research and educational purposes only. Clinical treatment decisions must be made by qualified healthcare professionals.
 
 ---
 
-## ⚕️ Clinical Implications
+##  Clinical Implications
 
 The 60.6% carbapenem/colistin resistance rate in this dataset has serious public health implications:
 
@@ -317,7 +313,7 @@ These findings are consistent with published reports on AMR prevalence in North 
 
 ---
 
-## 🚀 Setup & Reproduction
+##  Setup & Reproduction
 
 ### 1. Clone and install
 ```bash
@@ -350,7 +346,7 @@ streamlit run app.py
 
 ---
 
-## 📦 Requirements
+##  Requirements
 
 ```
 pandas>=2.0          numpy>=1.24          scikit-learn>=1.3
@@ -362,7 +358,7 @@ scipy>=1.11          openpyxl>=3.1
 
 ---
 
-## 📚 References
+##  References
 
 1. Alcock et al. 2023. CARD 2023: expanded curation, support for machine learning, and resistome prediction. *Nucleic Acids Research*, **51**, D690–D699.
 2. EUCAST. 2024. *Breakpoint tables for interpretation of MICs and zone diameters*, Version 14.0.
