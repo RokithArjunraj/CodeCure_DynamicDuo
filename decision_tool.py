@@ -365,7 +365,8 @@ if predict_btn:
         predictions, probabilities = {}, {}
         for target, model in models.items():
             feature_list = FEATURE_SETS[target]
-            X_input = X_full[feature_list]
+            #X_input = X_full[feature_list]
+            X_input = X_full.reindex(columns=feature_list, fill_value=0)
             pred = int(model.predict(X_input)[0])
             prob = model.predict_proba(X_input)[0].tolist()
             predictions[target] = pred
