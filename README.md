@@ -2,11 +2,11 @@
 
 <div align="center">
 
-### CodeCure Biohackathon 2025 — Track B: Antibiotic Resistance Prediction
+### CodeCure Biohackathon 2026 — Track B: Antibiotic Resistance Prediction
 
 [ Live Tool](https://codecuredynamicduo-zsnpqygapp6lkcxnogxrmte.streamlit.app/) · [ Notebooks](./Notebooks/) · [ Outputs](./outputs/)
 
-*Predicting antibiotic resistance in bacterial isolates by bridging phenotypic susceptibility data with CARD genomic resistance knowledge — enabling data-driven treatment guidance.*
+*Predicting antibiotic resistance in bacterial isolates by bridging phenotypic susceptibility data with CARD genomic resistance knowledge , enabling data-driven treatment guidance.*
 
 </div>
 
@@ -57,7 +57,8 @@ Kaggle (9,957) + Mendeley (274) + CARD ARO index
 CodeCure_DynamicDuo/
 ├── Notebooks/
 │   ├── 01_Data_Integration_Preprocessing_FE.ipynb
-│   └── 02_Model_Building_Feature_imp.ipynb
+│   |── 02_Model_Building_Feature_imp.ipynb
+|   └── 03_Gene_Network.ipynb
 ├── Data/
 │   ├── raw/
 │   └── processed/amr_final_v2.csv          ← 10,231 × 70
@@ -67,8 +68,7 @@ CodeCure_DynamicDuo/
 │   ├── xgb_quinolone.pkl
 │   └── xgb_other.pkl
 ├── outputs/                                 ← confusion matrices, SHAP plots, gene network
-├── app.py                                   ← Streamlit decision tool
-├── gene_network.py
+├── decision_tool.py                                   ← Streamlit decision tool
 └── requirements.txt
 ```
 
